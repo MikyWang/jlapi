@@ -30,7 +30,7 @@ build/Release
 node_modules
 
 .idea
-routes/**/*.js
-routes/**/*.js.map
+app/**/*.js
+app/**/*.js.map
 typings
 .DS_Store
