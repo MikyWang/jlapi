@@ -13,6 +13,7 @@ export class KanaRouter implements LinkRouter {
             res.send('hello boy');
         });
         this.router.get('/kanas', (req: Request, res: Response, next: NextFunction) => {
+            res.setHeader('Access-Control-Allow-Origin', '*');
             var kanamanager = new KanaManager();
             kanamanager.selectAll(req, res);
         })
