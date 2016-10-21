@@ -2,20 +2,22 @@ import { KanaManager } from '../dataManagers/kanaManager';
 import { NextFunction, Router } from '~express/lib/express';
 import { Request } from '~express/lib/request';
 import { Response } from '~express/lib/response';
-import * as express from 'express';
 import { LinkRouter } from '../routers/LinkRouter';
 
-export class KanaRouter implements LinkRouter {
-    public router = express.Router();
-    public link: string = '/';
+export class KanaRouter extends LinkRouter<KanaManager> {
     constructor() {
+        super();
+        this.link = '/';
+        this.manager = this.createInstance(KanaManager);
+        this.initPath();
+    }
+    private initPath() {
         this.router.get('/', (req: Request, res: Response, next: NextFunction) => {
-            res.send('hello boy');
+            res.json('ss');
         });
         this.router.get('/kanas', (req: Request, res: Response, next: NextFunction) => {
             res.setHeader('Access-Control-Allow-Origin', '*');
-            var kanamanager = new KanaManager();
-            kanamanager.selectAll(req, res);
+            this.manager.selectAll(req, res);
         })
     }
 }

@@ -9,6 +9,10 @@ interface IConfig {
     password: string;
     database: string;
 }
+interface IQuery {
+    query: string;
+    callback: Function;
+}
 export class DBManagerBase {
     private config: IConfig;
     protected pool: mysql.IPool;
@@ -17,27 +21,35 @@ export class DBManagerBase {
         this.config = JSON.parse(file.readFileSync('dbconfig.json', 'utf-8'));
         this.pool = mysql.createPool(this.config);
     }
-    private handleDatabase(req: Request, res: Response, callback: Function) {
+
+    /**
+     * select all data from table.
+     */
+    public selectAll(req: Request, res: Response) {
+        let query: IQuery = {
+            query: `select * from ${this.name}`,
+            callback: (rows) => {
+                res.json(rows);
+            }
+        }
+        this.handleDatabase(req, res, query);
+    }
+
+    private handleDatabase(req: Request, res: Response, query: IQuery) {
         this.pool.getConnection((err, connection) => {
             if (err) {
                 connection.release();
                 res.json({ "code": 100, "status": "Error in connection database" });
             }
-            connection.on('error', function (err) {
-                connection.release();
-                res.json({ "code": 100, "status": "Error in connection database" });
-            });
-            callback(connection, res);
-        })
-    }
-
-    public selectAll(req: Request, res: Response) {
-        this.handleDatabase(req, res, (connection, res) => {
-            connection.query(`select * from ${this.name}`, function (err, rows) {
+            connection.query(query.query, (err, rows) => {
                 connection.release();
                 if (!err) {
-                    res.json(rows);
+                    query.callback(rows);
                 }
+            });
+            connection.on('error', err => {
+                connection.release();
+                res.json({ "code": 100, "status": "Error in connection database" });
             });
         })
     }
